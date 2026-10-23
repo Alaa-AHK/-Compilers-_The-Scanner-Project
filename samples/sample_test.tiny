@@ -1,0 +1,8 @@
+{ Test of all tokens from the specification table }
+if x < 12 then
+  repeat
+    read abc;
+    xyz := abc + 4 - (289 * x) / 2;
+    write xyz;
+  until xyz = 0
+end;
