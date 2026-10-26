@@ -124,19 +124,61 @@ def read_source_from_stdin() -> str:
 
 
 # ===================================================================================
-# TODO [Subteam 2 - Next Steps]: Implement Output Generation
+# Subteam 2: Output Generation & Processing
 # ===================================================================================
-def write_token_file(tokens: list, output_path: Union[str, Path]) -> None:
+def write_token_file(tokens: list, output_path: Union[str, Path], use_spec_casing: bool = True) -> None:
     """
-    TODO: Write tokens to output file in format: '<token_value>, <token_type>'
-    (To be implemented when Token structure and Scanner are ready).
+    Writes tokens to output file in format: '<token_value>, <token_type>'
+
+    Rules:
+      - Each token is written on a new line.
+      - Control tokens such as ENDFILE are excluded.
+      - Uses UTF-8 encoding.
+
+    Args:
+        tokens (list): List of Token objects.
+        output_path (Union[str, Path]): Target output file path.
+        use_spec_casing (bool): If True, uses spec-compatible casing (e.g. Identifier, assign, number).
     """
-    raise NotImplementedError("Output writing will be added in a subsequent step.")
+    if not output_path:
+        raise ValueError("Output file path cannot be empty.")
+
+    target = Path(output_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+
+    lines = []
+    for tok in tokens:
+        # Skip control tokens like ENDFILE
+        if hasattr(tok, "type") and getattr(tok.type, "name", "") == "ENDFILE":
+            continue
+
+        if hasattr(tok, "to_output_format"):
+            lines.append(tok.to_output_format(use_spec_casing=use_spec_casing))
+        else:
+            lines.append(str(tok))
+
+    content = "\n".join(lines)
+    if content:
+        content += "\n"
+
+    target.write_text(content, encoding="utf-8")
 
 
-def process_file(input_path: Union[str, Path], output_path: Union[str, Path]) -> None:
+def process_file(input_path: Union[str, Path], output_path: Union[str, Path]) -> list:
     """
-    TODO: Connect input reading -> scanner -> output writing.
-    (To be implemented when Scanner is ready).
+    Connects: Input File -> Scanner -> Output File.
+
+    Args:
+        input_path (Union[str, Path]): Source TINY file path.
+        output_path (Union[str, Path]): Destination token file path.
+
+    Returns:
+        list: The list of scanned Token objects.
     """
-    raise NotImplementedError("End-to-end processing will be added in a subsequent step.")
+    from src.scanner.scanner import Scanner
+
+    source_code = read_source_file(input_path)
+    scanner = Scanner(source_code)
+    tokens = scanner.scan_all()
+    write_token_file(tokens, output_path)
+    return tokens

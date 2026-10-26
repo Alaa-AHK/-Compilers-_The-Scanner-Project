@@ -24,3 +24,17 @@ Define the Deterministic Finite Automaton (DFA) states and transition rules for 
      transition immediately to DONE.
 ===================================================================================
 """
+
+from enum import Enum, auto
+
+
+class State(Enum):
+    """
+    DFA states for the TINY language lexical analyzer.
+    """
+    START = auto()       # Initial state before reading a token
+    IN_NUM = auto()      # Accumulating digit characters
+    IN_ID = auto()       # Accumulating alphabetic identifier/keyword characters
+    IN_ASSIGN = auto()   # Saw ':', expecting '=' next
+    IN_COMMENT = auto()  # Inside '{ ... }', skipping contents until '}'
+    DONE = auto()        # Token recognition complete
