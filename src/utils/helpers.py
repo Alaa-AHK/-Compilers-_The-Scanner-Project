@@ -38,7 +38,7 @@ def format_lexical_error(line: int, column: int, message: str, character: Option
     return f"[Line {line}, Column {column}]: Lexical Error -> {message}"
 
 
-def print_banner(mode: str = "GUI") -> None:
+def print_banner(mode: str = "CLI") -> None:
     """
     Prints a clean console diagnostic header for the application.
     """

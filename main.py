@@ -5,15 +5,15 @@ ASSIGNED TO: Subteam 3 (Integration, QA & Build - 1 Member)
 ===================================================================================
 
 [OBJECTIVE]
-Application entry point and execution mode dispatcher.
+Application entry point and execution mode dispatcher (CLI only).
 
 [RULES & SPECIFICATIONS]
 1. Mode Dispatching Rules:
-   - Default Mode: If launched with no arguments (or by double-clicking the .exe),
-     launch the Graphical User Interface (Subteam 2's GUI).
    - CLI Mode: If provided with `-i <input_file>` and `-o <output_file>`,
-     run headless scanning and generate the output file without opening a window.
+     run headless scanning and generate the output file.
    - Test Mode: If passed `--test`, execute the automated test suite.
+   - Default Mode: If launched with no arguments, print usage help and exit
+     with a non-zero status.
 
 2. Exit Rules:
    - Return status 0 on clean execution.
@@ -78,24 +78,23 @@ def main() -> int:
         "-o", "--output",
         help="Path to output file for tokens list"
     )
-    parser.add_argument(
-        "--test",
-        action="store_true",
-        help="Run automated test suite"
-    )
+    # parser.add_argument(
+    #     "--test",
+    #     action="store_true",
+    #     help="Run automated test suite"
+    # )
 
     args = parser.parse_args()
 
-    if args.test:
-        return run_tests()
+    # if args.test:
+    #     return run_tests()
 
     if args.input and args.output:
         return run_cli(args.input, args.output)
 
-    # Default mode: Launch Desktop GUI
-    from src.gui.app import launch_gui
-    launch_gui()
-    return 0
+    # Default mode: no action specified, show usage help
+    parser.print_help()
+    return 1
 
 
 if __name__ == "__main__":
