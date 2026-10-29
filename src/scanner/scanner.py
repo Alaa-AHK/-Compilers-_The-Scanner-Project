@@ -1,7 +1,6 @@
 """
 ===================================================================================
-FILE: src/scanner/scanner.py
-ASSIGNED TO: Subteam 1 (Core Lexical Engine - 2 Members)
+src/scanner/scanner.py
 ===================================================================================
 
 [OBJECTIVE]
@@ -45,12 +44,6 @@ class Scanner:
         self.cursor: int = 0
         self.line: int = 1
         self.column: int = 1
-
-    def _peek(self) -> Optional[str]:
-        """Returns the next character without advancing the cursor, or None if EOF."""
-        if self.cursor < self.length:
-            return self.source[self.cursor]
-        return None
 
     def _get_char(self) -> Optional[str]:
         """Consumes and returns the next character, updating line and column counters."""
@@ -147,6 +140,7 @@ class Scanner:
                 else:
                     return Token(TokenType.ERROR, ch, token_line, token_col)
 
+
             elif state == State.IN_COMMENT:
                 if ch == "}":
                     state = State.START
@@ -191,4 +185,6 @@ class Scanner:
             if tok.type == TokenType.ENDFILE:
                 break
             tokens.append(tok)
+            if tok.type == TokenType.ERROR:
+                break  # Stop scanning on first lexical error
         return tokens
