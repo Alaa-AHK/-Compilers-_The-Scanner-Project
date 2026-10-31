@@ -22,6 +22,7 @@ Implement the core scanner engine that reads source text and extracts tokens.
 """
 
 from typing import List, Optional
+from unittest import result
 from src.scanner.tokens import (
     Token,
     TokenType,
@@ -82,6 +83,7 @@ class Scanner:
         token_string: List[str] = []
         token_line = self.line
         token_col = self.column
+        result=None
 
         while state != State.DONE:
             ch = self._get_char()
@@ -89,19 +91,22 @@ class Scanner:
             if ch is None:
                 # Reached End of File (EOF)
                 if state == State.START:
-                    return Token(TokenType.ENDFILE, "", token_line, token_col)
+                    result= Token(TokenType.ENDFILE, "", token_line, token_col)
                 elif state == State.IN_NUM:
-                    return Token(TokenType.NUMBER, "".join(token_string), token_line, token_col)
+                    result= Token(TokenType.NUMBER, "".join(token_string), token_line, token_col)
                 elif state == State.IN_ID:
                     lexeme = "".join(token_string)
                     token_type = KEYWORDS.get(lexeme.lower(), TokenType.IDENTIFIER)
-                    return Token(token_type, lexeme, token_line, token_col)
+                    result= Token(token_type, lexeme, token_line, token_col)
                 elif state == State.IN_ASSIGN:
                     # Incomplete assignment operator at EOF
-                    return Token(TokenType.ERROR, ":", token_line, token_col)
+                    result= Token(TokenType.ERROR, ":", token_line, token_col)
                 elif state == State.IN_COMMENT:
                     # Unterminated comment at EOF
-                    return Token(TokenType.ERROR, "Unterminated comment '{...}'", token_line, token_col)
+                    result= Token(TokenType.ERROR, "Unterminated comment '{...}'", token_line, token_col)
+
+                state = State.DONE
+                continue
 
             if state == State.START:
                 # Save starting coordinates of the token
@@ -134,11 +139,15 @@ class Scanner:
 
                 # Single-character special symbols
                 elif ch in SINGLE_CHAR_SYMBOLS:
-                    return Token(SINGLE_CHAR_SYMBOLS[ch], ch, token_line, token_col)
+                    result= Token(SINGLE_CHAR_SYMBOLS[ch], ch, token_line, token_col)
+                    state = State.DONE
+                   
 
                 # Unrecognized character
                 else:
-                    return Token(TokenType.ERROR, ch, token_line, token_col)
+                    result= Token(TokenType.ERROR, ch, token_line, token_col)
+                    state = State.DONE
+                    
 
 
             elif state == State.IN_COMMENT:
@@ -151,7 +160,9 @@ class Scanner:
                 else:
                     # Non-digit: put character back and finalize NUMBER token
                     self._unget_char(ch)
-                    return Token(TokenType.NUMBER, "".join(token_string), token_line, token_col)
+                    result= Token(TokenType.NUMBER, "".join(token_string), token_line, token_col)
+                    state = State.DONE
+                    
 
             elif state == State.IN_ID:
                 if ch.isalpha():
@@ -161,18 +172,28 @@ class Scanner:
                     self._unget_char(ch)
                     lexeme = "".join(token_string)
                     token_type = KEYWORDS.get(lexeme.lower(), TokenType.IDENTIFIER)
-                    return Token(token_type, lexeme, token_line, token_col)
+                    result= Token(token_type, lexeme, token_line, token_col)
+                    state = State.DONE
+                    
 
             elif state == State.IN_ASSIGN:
                 if ch == "=":
                     token_string.append(ch)
-                    return Token(TokenType.ASSIGN, ":=", token_line, token_col)
+
+                    result= Token(TokenType.ASSIGN, ":=", token_line, token_col)
+                    state = State.DONE
+                    
+
                 else:
                     # Lone ':' is invalid in TINY
                     self._unget_char(ch)
-                    return Token(TokenType.ERROR, ":", token_line, token_col)
+                    result= Token(TokenType.ERROR, ":", token_line, token_col)
+                    state = State.DONE
+                    
 
-        return Token(TokenType.ENDFILE, "", self.line, self.column)
+        
+        return result
+
 
     def scan_all(self) -> List[Token]:
         """

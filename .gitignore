@@ -37,6 +37,7 @@ ENV/
 .idea/
 *.swp
 *~
+.vs/
 
 # Output tokens
 output/
