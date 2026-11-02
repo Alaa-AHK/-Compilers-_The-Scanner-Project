@@ -1,85 +1,107 @@
-# TINY Language Lexical Analyzer (Scanner Project)
+# TINY Language Scanner
 
-A lexical analyzer for the TINY programming language implemented in Python. Organized by subteams according to the 2, 2, 1 team division.
+A lexical analyzer for the TINY programming language, written in Python.
+It reads a TINY source file and writes out the list of tokens it finds,
+one per line, in the form `value, type`.
 
----
-
-## 👥 Subteams Overview (2, 2, 1 Division)
-
-```
-                         ┌─────────────────────────────┐
-                         │    TINY SCANNER PROJECT     │
-                         └──────────────┬──────────────┘
-                                        │
-         ┌──────────────────────────────┼──────────────────────────────┐
-         ▼                              ▼                              ▼
-     Subteam 1                      Subteam 2                      Subteam 3
-  (2 Students)                   (2 Students)                   (1 Student)
-  Core Lexical Engine            I/O & User Interface           Integration & Build
-```
-
-| Subteam | Size | Scope | Assigned Files | Objective & Rules |
-| :--- | :--- | :--- | :--- | :--- |
-| **Subteam 1** | 2 Students | Core Lexical Engine | `src/scanner/tokens.py`<br>`src/scanner/dfa.py`<br>`src/scanner/scanner.py` | Implement `getToken()`, define tokens & DFA states, ignore `{...}` comments, format tokens. |
-| **Subteam 2** | 2 Students | I/O & User Interface | `src/io/file_handler.py`<br>`src/gui/app.py` | Read/write token files (`value, type`) and provide Tkinter GUI for program snapshots. |
-| **Subteam 3** | 1 Student | Integration & Packaging | `main.py`<br>`tests/test_scanner.py`<br>`build_exe.bat` | CLI/GUI dispatcher, automated test suite, and Windows `.exe` packaging. |
-
----
-
-## 📂 Formal Project Folder Structure
+## Project layout
 
 ```text
-Compilers/
-├── .gitignore                      # Git ignore patterns
-├── README.md                       # Project documentation
-├── requirements.txt                # Packaging dependencies (pyinstaller)
-├── build_exe.bat                   # [Subteam 3] Windows .exe compilation script
-├── main.py                         # [Subteam 3] Application entry point (CLI/GUI)
+.
+├── main.py                 # Entry point and command line handling
+├── build_exe.bat           # Builds the Windows executable
+├── requirements.txt        # PyInstaller, for packaging only
 │
 ├── src/
-│   ├── scanner/                    # === SUBTEAM 1: CORE LEXICAL ENGINE (2 Students) ===
-│   │   ├── tokens.py               # Token definitions & formatting rules
-│   │   ├── dfa.py                  # DFA states & transition rules
-│   │   └── scanner.py              # getToken() scanner engine
-│   │
-│   ├── io/                         # === SUBTEAM 2: I/O & GUI (2 Students) ===
-│   │   └── file_handler.py         # File input reading & output serialization
-│   │
-│   ├── gui/
-│   │   └── app.py                  # Tkinter desktop GUI (for Snapshots)
-│   │
-│   └── utils/                      # === SUBTEAM 3: INTEGRATION & QA (1 Student) ===
-│       └── helpers.py              # Diagnostics and error formatting
+│   ├── scanner/
+│   │   ├── tokens.py       # Token types, keyword table, output formatting
+│   │   ├── dfa.py          # Scanner states
+│   │   └── scanner.py      # getToken() and the scanning loop
+│   ├── io/
+│   │   └── file_handler.py # Reading source files, writing token files
+│   └── utils/
+│       └── helpers.py      # Console output and error message formatting
 │
 ├── tests/
-│   └── test_scanner.py             # [Subteam 3] Automated test suite
+│   └── test_scanner.py     # Unit tests
 │
-└── samples/                        # Sample TINY code snippets
+└── samples/                # Example TINY programs
     ├── sample_factorial.tiny
     └── sample_test.tiny
 ```
 
----
+## Requirements
 
-## 🚀 How to Run the Project
+- Python 3.8 or newer (standard library only, no dependencies)
+- PyInstaller, only if you want to build the standalone `.exe`
 
-### 1. Launch GUI Mode (for Screenshots):
-```bash
-python main.py
-```
+## Running from source
 
-### 2. Run CLI Mode:
 ```bash
 python main.py -i samples/sample_factorial.tiny -o output_tokens.txt
 ```
 
-### 3. Run Automated Tests:
+| Option | Meaning |
+| :--- | :--- |
+| `-i`, `--input` | Path to the TINY source file to scan |
+| `-o`, `--output` | Path to write the token list to |
+
+Both options are required. Running `python main.py` with no arguments prints
+the usage help.
+
+Exit codes: `0` on a clean scan, `1` if lexical errors were found, `2` if the
+input file could not be read.
+
+## Running the executable
+
+A standalone build needs no Python installed. It takes the same arguments:
+
+```cmd
+dist\TinyScanner\TinyScanner.exe -i samples\sample_factorial.tiny -o output_tokens.txt
+```
+
+## Building the executable
+
+```cmd
+build_exe.bat
+```
+
+The result is `dist\TinyScanner\TinyScanner.exe`. Note that the build wipes
+`dist\TinyScanner\` first, so close anything open in that folder before
+running it, and keep your test files elsewhere.
+
+## Running the tests
+
 ```bash
 python -m unittest discover tests
 ```
 
-### 4. Build Standalone Windows Executable (`.exe`):
-```cmd
-build_exe.bat
+Run this from the project root, otherwise the `src` package will not be found.
+
+## Output format
+
+Each recognized token is written on its own line as `value, type`:
+
+```text
+read, READ
+x, Identifier
+;, SEMICOLON
+if, IF
+0, number
+<, LESSTHAN
+x, Identifier
+then, THEN
 ```
-The standalone `.exe` will be generated inside the `dist/` directory.
+
+Comments enclosed in `{ ... }` are skipped. Anything that does not form a
+legal token is reported as `ERROR`.
+
+## Tokens
+
+Reserved words: `if`, `then`, `end`, `repeat`, `until`, `read`, `write`.
+These are case-sensitive, so `IF` scans as an identifier, not a keyword.
+
+Symbols: `;` `<` `=` `+` `-` `*` `/` `(` `)` `:=`
+
+An identifier is a sequence of letters; a number is a sequence of digits.
+

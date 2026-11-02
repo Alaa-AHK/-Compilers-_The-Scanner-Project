@@ -98,6 +98,7 @@ class Scanner:
                     lexeme = "".join(token_string)
                     token_type = KEYWORDS.get(lexeme, TokenType.IDENTIFIER)
                     result= Token(token_type, lexeme, token_line, token_col)
+                    return Token(token_type, lexeme, token_line, token_col)
                 elif state == State.IN_ASSIGN:
                     # Incomplete assignment operator at EOF
                     result= Token(TokenType.ERROR, ":", token_line, token_col)
@@ -175,6 +176,7 @@ class Scanner:
                     result= Token(token_type, lexeme, token_line, token_col)
                     state = State.DONE
                     
+                    return Token(token_type, lexeme, token_line, token_col)
 
             elif state == State.IN_ASSIGN:
                 if ch == "=":
