@@ -19,7 +19,16 @@ if %errorlevel% neq 0 (
 )
 
 echo [2/3] Building standalone Windows executable (TinyScanner.exe)...
-python -m PyInstaller --noconfirm --onedir --windowed --name "TinyScanner" main.py
+python -m PyInstaller --noconfirm --onedir --console --name "TinyScanner" main.py
+if %errorlevel% neq 0 (
+    echo.
+    echo [ERROR] Build FAILED. The executable was NOT produced.
+    echo If the error above is a PermissionError on dist\TinyScanner, close any
+    echo program using that folder ^(a running TinyScanner.exe, an open file in
+    echo Notepad/an editor, or an Explorer window^) and run this script again.
+    pause
+    exit /b 1
+)
 
 echo [3/3] Build finished!
 echo Executable is located at: dist\TinyScanner\TinyScanner.exe
