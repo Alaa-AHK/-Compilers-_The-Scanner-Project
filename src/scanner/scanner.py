@@ -94,7 +94,7 @@ class Scanner:
                     return Token(TokenType.NUMBER, "".join(token_string), token_line, token_col)
                 elif state == State.IN_ID:
                     lexeme = "".join(token_string)
-                    token_type = KEYWORDS.get(lexeme.lower(), TokenType.IDENTIFIER)
+                    token_type = KEYWORDS.get(lexeme, TokenType.IDENTIFIER)
                     return Token(token_type, lexeme, token_line, token_col)
                 elif state == State.IN_ASSIGN:
                     # Incomplete assignment operator at EOF
@@ -160,7 +160,7 @@ class Scanner:
                     # Non-alpha: put character back and check keywords vs identifier
                     self._unget_char(ch)
                     lexeme = "".join(token_string)
-                    token_type = KEYWORDS.get(lexeme.lower(), TokenType.IDENTIFIER)
+                    token_type = KEYWORDS.get(lexeme, TokenType.IDENTIFIER)
                     return Token(token_type, lexeme, token_line, token_col)
 
             elif state == State.IN_ASSIGN:
